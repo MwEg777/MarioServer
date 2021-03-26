@@ -225,6 +225,41 @@ namespace MythServer
 
         }
 
+        public void UPDATE_MARIO_SIZE(Player player, Dictionary<string, object> payload)
+        {
+
+            player.playerRoom.UpdateSize(player, payload["newsize"]);
+
+        }
+
+        public void BOUNCE_BLOCK(Player player, Dictionary<string, object> payload)
+        {
+
+            player.playerRoom.BounceBlock(player, payload["parentname"]);
+
+        }
+
+        public void ACTIVATE_BLOCK(Player player, Dictionary<string, object> payload)
+        {
+
+            player.playerRoom.ActivateBlock(player, payload["parentname"], payload["triggerersize"]);
+
+        }
+
+        public void TAKE_POWERUP(Player player, Dictionary<string, object> payload)
+        {
+
+            player.playerRoom.TakePowerup(player, payload["powerupid"]);
+
+        }
+
+        public void STOMP_ENEMY(Player player, Dictionary<string, object> payload)
+        {
+
+            player.playerRoom.StompEnemy(player, payload["enemyname"], payload["enemypos"]);
+
+        }
+
         #endregion
 
         #region ServerResponses
@@ -323,6 +358,73 @@ namespace MythServer
             toConvert.Add("type", "UPDATE_MARIO_POS");
             toConvert.Add("id", playerID);
             toConvert.Add("msi", msi);
+
+            return toConvert.ToJson();
+
+        }
+        public static string R_UPDATE_MARIO_SIZE(string playerID, object newSize)
+        {
+
+            Dictionary<string, object> toConvert = new Dictionary<string, object>();
+
+            toConvert.Add("type", "UPDATE_MARIO_SIZE");
+            toConvert.Add("id", playerID);
+            toConvert.Add("newsize", newSize);
+
+            return toConvert.ToJson();
+
+        }
+
+        public static string R_BOUNCE_BLOCK(string playerID, object parentName)
+        {
+
+            Dictionary<string, object> toConvert = new Dictionary<string, object>();
+
+            toConvert.Add("type", "BOUNCE_BLOCK");
+            toConvert.Add("id", playerID);
+            toConvert.Add("parentname", parentName);
+
+            return toConvert.ToJson();
+
+        }
+
+        public static string R_ACTIVATE_BLOCK(string playerID, object parentName, string powerupID, object triggererSize)
+        {
+
+            Dictionary<string, object> toConvert = new Dictionary<string, object>();
+
+            toConvert.Add("type", "ACTIVATE_BLOCK");
+            toConvert.Add("id", playerID);
+            toConvert.Add("parentname", parentName);
+            toConvert.Add("powerupid", powerupID);
+            toConvert.Add("triggerersize", triggererSize);
+
+            return toConvert.ToJson();
+
+        }
+
+        public static string R_TAKE_POWERUP(string playerID, object powerupID)
+        {
+
+            Dictionary<string, object> toConvert = new Dictionary<string, object>();
+
+            toConvert.Add("type", "TAKE_POWERUP");
+            toConvert.Add("id", playerID);
+            toConvert.Add("powerupid", powerupID);
+
+            return toConvert.ToJson();
+
+        }
+
+        public static string R_STOMP_ENEMY(string playerID, object enemyName, object enemyPos)
+        {
+
+            Dictionary<string, object> toConvert = new Dictionary<string, object>();
+
+            toConvert.Add("type", "STOMP_ENEMY");
+            toConvert.Add("id", playerID);
+            toConvert.Add("enemyname", enemyName);
+            toConvert.Add("enemypos", enemyPos);
 
             return toConvert.ToJson();
 
@@ -628,9 +730,11 @@ namespace MythServer
         {
 
             try
-            { 
+            {
 
-                foreach(Player player in roomPlayers)
+                List<Player> newList = new List<Player>(roomPlayers);
+
+                foreach(Player player in newList)
                 {
 
                     if (excludedPlayers != null)
@@ -656,6 +760,42 @@ namespace MythServer
         {
 
             BroadcastMessageToRoomPlayers(Methods.R_UPDATE_MARIO_POS(player.id, msi));
+
+        }
+
+        public void UpdateSize(Player player, object newSize)
+        {
+
+            BroadcastMessageToRoomPlayers(Methods.R_UPDATE_MARIO_SIZE(player.id, newSize));
+
+        }
+
+        public void BounceBlock(Player player, object parentName)
+        {
+
+            BroadcastMessageToRoomPlayers(Methods.R_BOUNCE_BLOCK(player.id, parentName));
+
+        }
+
+        public void ActivateBlock(Player player, object parentName, object triggererSize)
+        {
+
+            string powerupID = Guid.NewGuid().ToString();
+            BroadcastMessageToRoomPlayers(Methods.R_ACTIVATE_BLOCK(player.id, parentName, powerupID, triggererSize));
+
+        }
+
+        public void TakePowerup(Player player, object powerupID)
+        {
+
+            BroadcastMessageToRoomPlayers(Methods.R_TAKE_POWERUP(player.id, powerupID));
+
+        }
+
+        public void StompEnemy(Player player, object enemyName, object enemyPos)
+        {
+
+            BroadcastMessageToRoomPlayers(Methods.R_STOMP_ENEMY(player.id, enemyName, enemyPos));
 
         }
 

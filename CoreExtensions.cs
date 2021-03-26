@@ -16,10 +16,11 @@ public static class CoreExtensions
     public static string ToJson(this Dictionary<string, object> dict)
     {
 
-        return JsonConvert.SerializeObject(dict) + "$eof$";
+        return JsonConvert.SerializeObject(dict);
+        //return JsonConvert.SerializeObject(dict) + "$eof$";
 
     }
-    public static T GetDefault<T>(this Dictionary<string, T> instance, string key, T val = default(T))
+        public static T GetDefault<T>(this Dictionary<string, T> instance, string key, T val = default(T))
     {
         if (instance.ContainsKey(key))
             return instance[key];

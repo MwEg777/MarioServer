@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using WatsonWebsocket;
+using System.Diagnostics;
 
 namespace MythServer
 {
@@ -22,6 +23,8 @@ namespace MythServer
         static Dictionary<string, MethodInfo> reflectedMethods = new Dictionary<string, MethodInfo>();
         public static MongoCRUD db;
         public static WatsonWsServer wss;
+
+        public static Stopwatch sw;
 
         //public static WebSocketServer wssv;
 
@@ -39,6 +42,9 @@ namespace MythServer
             wss.MessageReceived += Player_MessageReceived;
 
             wss.Start();
+
+            sw = new Stopwatch();
+            sw.Start();
 
             while (!_quitFlag)
             {
@@ -70,6 +76,8 @@ namespace MythServer
             if (player != null)
             {
 
+                player.online = false;
+
                 Console.WriteLine($"Removing player {player.name} from server.");
 
                 if (player.playerRoom != null)
@@ -88,7 +96,13 @@ namespace MythServer
 
             string clientMessage = Encoding.UTF8.GetString(e.Data);
 
+            Dictionary<string, object> clientMessageDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(clientMessage);
+
+            ProcessClientMessage(player, clientMessageDict);
+
             //Console.WriteLine($"Got message from player {player.name}");
+
+            /*
 
             try
             {
@@ -160,6 +174,8 @@ namespace MythServer
 
             }
 
+            */
+
         }
 
         public void PlayerThread(object obj, string ipPort)
@@ -176,11 +192,10 @@ namespace MythServer
             Methods.players.Add(player);
             Methods.playerAddressesDict.Add(ipPort, player);
 
-            while (true)
+            /*
+             
+            while (player.online)
             {
-
-                if (!wss.IsClientConnected(ipPort))
-                    break;
 
                 try
                 {
@@ -233,8 +248,11 @@ namespace MythServer
                 
                 }
 
+                Thread.Sleep(1);
+
             }
 
+            */
             Console.WriteLine("Client stopped listening. Exiting thread..");
 
         }
@@ -246,7 +264,6 @@ namespace MythServer
             { 
 
                 await wss.SendAsync(player.address, message);
-                //Console.WriteLine($"Message should be sent. Address: {player.address}, message: {message}");
 
             }
             catch (Exception ex)
