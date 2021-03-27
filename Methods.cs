@@ -260,6 +260,13 @@ namespace MythServer
 
         }
 
+        public void SHOOT_FIREBALL(Player player, Dictionary<string, object> payload)
+        {
+
+            player.playerRoom.ShootFireball(player, payload["shootpos"], payload["direction"]);
+
+        }
+
         #endregion
 
         #region ServerResponses
@@ -425,6 +432,19 @@ namespace MythServer
             toConvert.Add("id", playerID);
             toConvert.Add("enemyname", enemyName);
             toConvert.Add("enemypos", enemyPos);
+
+            return toConvert.ToJson();
+
+        }
+        public static string R_SHOOT_FIREBALL(string playerID, object shootPos, object direction)
+        {
+
+            Dictionary<string, object> toConvert = new Dictionary<string, object>();
+
+            toConvert.Add("type", "SHOOT_FIREBALL");
+            toConvert.Add("id", playerID);
+            toConvert.Add("shootpos", shootPos);
+            toConvert.Add("direction", direction);
 
             return toConvert.ToJson();
 
@@ -796,6 +816,13 @@ namespace MythServer
         {
 
             BroadcastMessageToRoomPlayers(Methods.R_STOMP_ENEMY(player.id, enemyName, enemyPos));
+
+        }
+
+        public void ShootFireball(Player player, object shootPos, object direction)
+        {
+
+            BroadcastMessageToRoomPlayers(Methods.R_STOMP_ENEMY(player.id, shootPos, direction));
 
         }
 
